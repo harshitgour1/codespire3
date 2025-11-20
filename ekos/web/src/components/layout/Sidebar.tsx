@@ -8,13 +8,17 @@ import {
   Network, 
   Video, 
   Settings,
-  LogOut
+  LogOut,
+  Sparkles
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { motion } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function Sidebar({ className }: SidebarProps) {
+  const { signOut } = useAuth();
   const links = [
     { name: "Home", href: "/", icon: LayoutDashboard },
     { name: "Search", href: "/search", icon: Search },
@@ -26,15 +30,20 @@ export function Sidebar({ className }: SidebarProps) {
   ];
 
   return (
-    <div className={cn("pb-12 w-64 border-r bg-background", className)}>
+    <div className={cn("pb-12 w-64 border-r bg-background/50 backdrop-blur-xl relative z-20", className)}>
       <div className="space-y-4 py-4">
-        <div className="px-4 py-2">
-          <h2 className="mb-2 px-2 text-lg font-semibold tracking-tight">
-            EKOS
-          </h2>
-          <p className="px-2 text-xs text-muted-foreground">
-            Enterprise Knowledge OS
-          </p>
+        <div className="px-6 py-4 flex items-center gap-2">
+          <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/20">
+             <Sparkles className="h-4 w-4 text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold tracking-tight text-foreground">
+              EKOS
+            </h2>
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+              Enterprise OS
+            </p>
+          </div>
         </div>
         <div className="px-3 py-2">
           <div className="space-y-1">
@@ -43,19 +52,45 @@ export function Sidebar({ className }: SidebarProps) {
                 key={link.href}
                 to={link.href}
                 className={({ isActive }) => cn(
-                  "flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors",
-                  isActive ? "bg-accent text-accent-foreground" : "transparent"
+                  "group flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ease-in-out",
+                  isActive 
+                    ? "bg-secondary/50 text-primary shadow-sm" 
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 )}
               >
-                <link.icon className="mr-2 h-4 w-4" />
-                {link.name}
+                {({ isActive }) => (
+                  <>
+                    <link.icon className={cn(
+                      "mr-3 h-4 w-4 transition-transform duration-200",
+                      isActive ? "scale-110" : "group-hover:scale-110"
+                    )} />
+                    {link.name}
+                    {isActive && (
+                      <motion.div
+                        layoutId="sidebar-active"
+                        className="absolute left-0 w-1 h-6 bg-primary rounded-r-full"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      />
+                    )}
+                  </>
+                )}
               </NavLink>
             ))}
           </div>
         </div>
       </div>
-      <div className="absolute bottom-4 px-7 w-full">
-         <Button variant="ghost" className="w-full justify-start pl-0 text-muted-foreground hover:text-foreground">
+      
+      {/* Decorative background blob */}
+      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-secondary/20 to-transparent pointer-events-none" />
+
+      <div className="absolute bottom-4 px-6 w-full">
+         <Button 
+           variant="ghost" 
+           className="w-full justify-start pl-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+           onClick={() => signOut()}
+         >
             <LogOut className="mr-2 h-4 w-4" />
             Logout
          </Button>

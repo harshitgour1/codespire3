@@ -4,57 +4,74 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    /* Light Peachy & Green Theme */
+    --background: 30 33% 98%;
+    /* #FFFCF9 - Very light warm white */
+    --foreground: 165 40% 15%;
+    /* #17362D - Deep Green for text */
+
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 165 40% 15%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --popover-foreground: 165 40% 15%;
+
+    --primary: 164 38% 30%;
+    /* #2F6A5D - Elegant Green */
+    --primary-foreground: 30 33% 98%;
+
+    --secondary: 24 85% 85%;
+    /* #FFDBC7 - Soft Peach */
+    --secondary-foreground: 165 40% 15%;
+
+    --muted: 160 20% 94%;
+    /* #F0F7F5 - Very light green/gray */
+    --muted-foreground: 165 10% 40%;
+
+    --accent: 160 30% 90%;
+    /* #DDF2EB - Light Mint */
+    --accent-foreground: 165 40% 15%;
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 10% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+
+    --border: 160 20% 90%;
+    --input: 160 20% 90%;
+    --ring: 164 38% 30%;
+
+    --radius: 0.75rem;
+    /* More rounded corners for aesthetic feel */
   }
+
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --background: 165 40% 10%;
+    --foreground: 30 33% 98%;
+
+    --card: 165 40% 12%;
+    --card-foreground: 30 33% 98%;
+
+    --popover: 165 40% 12%;
+    --popover-foreground: 30 33% 98%;
+
+    --primary: 24 85% 85%;
+    /* Peach becomes primary in dark mode */
+    --primary-foreground: 165 40% 15%;
+
+    --secondary: 164 38% 30%;
+    --secondary-foreground: 30 33% 98%;
+
+    --muted: 165 30% 15%;
+    --muted-foreground: 160 10% 60%;
+
+    --accent: 165 30% 20%;
+    --accent-foreground: 30 33% 98%;
+
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+
+    --border: 165 30% 20%;
+    --input: 165 30% 20%;
+    --ring: 24 85% 85%;
   }
 }
 
@@ -62,7 +79,27 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
+}
+
+/* Custom Scrollbar for Webkit */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/20 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/40;
 }

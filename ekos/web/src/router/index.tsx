@@ -10,10 +10,16 @@ import Meetings from '@/pages/Meetings';
 import Admin from '@/pages/Admin';
 import Login from '@/pages/Login';
 
+import ProtectedRoute from '@/components/ProtectedRoute';
+
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <AppLayout />,
+    element: (
+      <ProtectedRoute>
+        <AppLayout />
+      </ProtectedRoute>
+    ),
     children: [
       { index: true, element: <Home /> },
       { path: 'search', element: <Search /> },
