@@ -1,0 +1,214 @@
+{
+  "name": "EKOS n8n Workflows",
+  "version": "1.0.0",
+  "description": "Example n8n workflows for EKOS integration",
+  "workflows": [
+    {
+      "name": "Google Drive Sync to EKOS",
+      "description": "Monitors Google Drive for new files and syncs them to EKOS",
+      "nodes": [
+        {
+          "name": "Google Drive Trigger",
+          "type": "n8n-nodes-base.googleDriveTrigger",
+          "parameters": {
+            "event": "fileCreated",
+            "folder": "{{ $env.GOOGLE_DRIVE_FOLDER_ID }}"
+          }
+        },
+        {
+          "name": "Download File",
+          "type": "n8n-nodes-base.googleDrive",
+          "parameters": {
+            "operation": "download",
+            "fileId": "={{ $json.id }}"
+          }
+        },
+        {
+          "name": "Webhook to EKOS",
+          "type": "n8n-nodes-base.httpRequest",
+          "parameters": {
+            "method": "POST",
+            "url": "{{ $env.EKOS_API_URL }}/ingest/upload",
+            "authentication": "genericCredentialType",
+            "genericAuthType": "httpHeaderAuth",
+            "sendHeaders": true,
+            "headerParameters": {
+              "X-Tenant-ID": "{{ $env.TENANT_ID }}"
+            },
+            "sendBody": true,
+            "bodyParameters": {
+              "source": "google_drive",
+              "tenant_id": "{{ $env.TENANT_ID }}",
+              "metadata": "={{ JSON.stringify({ file_id: $json.id, name: $json.name, mimeType: $json.mimeType }) }}"
+            },
+            "sendBinaryData": true,
+            "binaryPropertyName": "data"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Jira Webhook to EKOS",
+      "description": "Receives Jira webhooks and ingests issue updates to EKOS",
+      "nodes": [
+        {
+          "name": "Webhook Trigger",
+          "type": "n8n-nodes-base.webhook",
+          "parameters": {
+            "path": "jira-ekos",
+            "httpMethod": "POST"
+          }
+        },
+        {
+          "name": "Process Jira Event",
+          "type": "n8n-nodes-base.code",
+          "parameters": {
+            "jsCode": "// Extract issue data from Jira webhook\nconst issue = items[0].json.issue;\nconst eventType = items[0].json.webhookEvent;\n\nreturn [{\n  json: {\n    event_type: eventType,\n    issue_key: issue.key,\n    issue_summary: issue.fields.summary,\n    issue_description: issue.fields.description,\n    issue_status: issue.fields.status.name,\n    issue_url: issue.self.replace('/rest/api/2/issue/', '/browse/')\n  }\n}];"
+          }
+        },
+        {
+          "name": "Webhook to EKOS",
+          "type": "n8n-nodes-base.httpRequest",
+          "parameters": {
+            "method": "POST",
+            "url": "{{ $env.EKOS_API_URL }}/webhook/n8n/connector-callback",
+            "authentication": "genericCredentialType",
+            "genericAuthType": "httpHeaderAuth",
+            "sendHeaders": true,
+            "headerParameters": {
+              "X-N8N-Signature": "{{ $env.N8N_WEBHOOK_SECRET }}",
+              "X-Tenant-ID": "{{ $env.TENANT_ID }}"
+            },
+            "sendBody": true,
+            "bodyParameters": {
+              "event_type": "jira_webhook",
+              "data": "={{ JSON.stringify($json) }}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "EKOS Query Automation",
+      "description": "Queries EKOS and creates actions (e.g., Jira tickets)",
+      "nodes": [
+        {
+          "name": "Manual Trigger",
+          "type": "n8n-nodes-base.manualTrigger"
+        },
+        {
+          "name": "Query EKOS",
+          "type": "n8n-nodes-base.httpRequest",
+          "parameters": {
+            "method": "POST",
+            "url": "{{ $env.EKOS_API_URL }}/query",
+            "authentication": "genericCredentialType",
+            "genericAuthType": "httpHeaderAuth",
+            "sendHeaders": true,
+            "headerParameters": {
+              "X-Tenant-ID": "{{ $env.TENANT_ID }}",
+              "Authorization": "Bearer {{ $env.EKOS_API_TOKEN }}"
+            },
+            "sendBody": true,
+            "bodyParameters": {
+              "query": "What are the open action items?",
+              "tenant_id": "{{ $env.TENANT_ID }}",
+              "top_k": 5,
+              "include_citations": true
+            }
+          }
+        },
+        {
+          "name": "Process Actions",
+          "type": "n8n-nodes-base.splitInBatches",
+          "parameters": {
+            "batchSize": 1,
+            "options": {}
+          }
+        },
+        {
+          "name": "Create Jira Ticket",
+          "type": "n8n-nodes-base.httpRequest",
+          "parameters": {
+            "method": "POST",
+            "url": "{{ $env.EKOS_API_URL }}/automation/create-jira",
+            "authentication": "genericCredentialType",
+            "genericAuthType": "httpHeaderAuth",
+            "sendBody": true,
+            "bodyParameters": {
+              "project": "{{ $env.JIRA_PROJECT }}",
+              "summary": "={{ $json.actions[0].title }}",
+              "description": "={{ $json.actions[0].description }}",
+              "issue_type": "Task",
+              "priority": "={{ $json.actions[0].priority }}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Screenshot Match Workflow",
+      "description": "Takes screenshot, matches against EKOS knowledge base",
+      "nodes": [
+        {
+          "name": "Manual Trigger",
+          "type": "n8n-nodes-base.manualTrigger"
+        },
+        {
+          "name": "Read Image",
+          "type": "n8n-nodes-base.readBinaryFile",
+          "parameters": {
+            "fileName": "screenshot.png"
+          }
+        },
+        {
+          "name": "Encode Base64",
+          "type": "n8n-nodes-base.code",
+          "parameters": {
+            "jsCode": "const binaryData = items[0].binary.data;\nconst base64 = binaryData.toString('base64');\nreturn [{\n  json: {\n    image_base64: base64\n  }\n}];"
+          }
+        },
+        {
+          "name": "Match Screenshot",
+          "type": "n8n-nodes-base.httpRequest",
+          "parameters": {
+            "method": "POST",
+            "url": "{{ $env.EKOS_API_URL }}/screenshot-match",
+            "authentication": "genericCredentialType",
+            "genericAuthType": "httpHeaderAuth",
+            "sendHeaders": true,
+            "headerParameters": {
+              "X-Tenant-ID": "{{ $env.TENANT_ID }}",
+              "Authorization": "Bearer {{ $env.EKOS_API_TOKEN }}"
+            },
+            "sendBody": true,
+            "bodyParameters": {
+              "image_base64": "={{ $json.image_base64 }}",
+              "tenant_id": "={{ $env.TENANT_ID }}",
+              "top_k": 5
+            }
+          }
+        },
+        {
+          "name": "Process Matches",
+          "type": "n8n-nodes-base.code",
+          "parameters": {
+            "jsCode": "// Process matches and send notification\nconst matches = items[0].json.matches;\nconst topMatch = matches[0];\n\nreturn [{\n  json: {\n    message: `Found ${matches.length} matches. Top match: ${topMatch.doc_id} (score: ${topMatch.score})`,\n    matches: matches\n  }\n}];"
+          }
+        }
+      ]
+    }
+  ],
+  "environment": {
+    "EKOS_API_URL": "http://localhost:8000",
+    "TENANT_ID": "default",
+    "EKOS_API_TOKEN": "your-api-token",
+    "N8N_WEBHOOK_SECRET": "your-webhook-secret",
+    "GOOGLE_DRIVE_FOLDER_ID": "your-folder-id",
+    "JIRA_PROJECT": "YOUR-PROJECT"
+  },
+  "usage": {
+    "instructions": "Import these workflows into n8n and configure the environment variables. Update the webhook URLs and authentication credentials as needed."
+  }
+}
+

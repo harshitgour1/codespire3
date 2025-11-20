@@ -3,6 +3,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import { SearchBar } from "@/components/search/SearchBar";
 import { motion } from "framer-motion";
 import { FileText, Calendar, Network, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const container = {
   hidden: { opacity: 0 },
@@ -20,6 +21,15 @@ const item = {
 };
 
 export default function Home() {
+  const navigate = useNavigate();
+
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      // Navigate to search page with query as state
+      navigate('/search', { state: { query } });
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] max-w-5xl mx-auto space-y-12 p-8 relative overflow-hidden">
       
@@ -46,7 +56,7 @@ export default function Home() {
       </motion.div>
 
       <div className="w-full flex justify-center z-10">
-        <SearchBar onSearch={(q) => console.log(q)} />
+        <SearchBar onSearch={handleSearch} />
       </div>
 
       <motion.div 

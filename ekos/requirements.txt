@@ -1,0 +1,54 @@
+# FastAPI and server
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.0
+
+# Gemini / Google AI
+google-generativeai==0.3.2
+google-cloud-secret-manager==2.18.0  # Optional: for Secret Manager
+
+# Vector Database
+pinecone-client==2.2.4  # Optional: for Pinecone
+# weaviate-client==3.25.3  # Alternative: uncomment if using Weaviate
+
+# Knowledge Graph
+neo4j==5.15.0  # Optional: for Neo4j
+
+# Background Tasks
+celery==5.3.4
+redis==5.0.1
+
+# Data Processing
+pandas==2.1.4
+numpy==1.26.2
+Pillow==10.1.0
+
+# OCR / STT (Optional: for preprocessing)
+# google-cloud-vision==3.5.0  # For OCR
+# openai-whisper==20231117  # For STT (requires ffmpeg)
+
+# HTTP Client
+httpx==0.25.2
+aiohttp==3.9.1
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+httpx==0.25.2  # Also for test client
+
+# Development
+ruff==0.1.7
+black==23.12.0
+mypy==1.7.1
+
+# Utilities
+python-dateutil==2.8.2
+typing-extensions==4.8.0
+

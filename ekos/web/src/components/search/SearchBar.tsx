@@ -1,12 +1,28 @@
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
+  initialValue?: string;
 }
 
-export function SearchBar({ onSearch }: SearchBarProps) {
+export function SearchBar({ onSearch, initialValue = "" }: SearchBarProps) {
+  const [query, setQuery] = useState(initialValue);
+
+  // Update query when initialValue changes
+  useEffect(() => {
+    if (initialValue) {
+      setQuery(initialValue);
+    }
+  }, [initialValue]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && query.trim()) {
+      onSearch(query.trim());
+    }
+  };
   return (
     <motion.div 
       initial={{ scale: 0.95, opacity: 0 }}
@@ -21,11 +37,9 @@ export function SearchBar({ onSearch }: SearchBarProps) {
         <Input 
           placeholder="Ask anything about your company..." 
           className="pl-12 h-14 text-lg border-none shadow-none focus-visible:ring-0 bg-transparent placeholder:text-muted-foreground/50"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              onSearch(e.currentTarget.value);
-            }
-          }}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
         />
         <div className="absolute right-4 top-4 flex items-center gap-2 pointer-events-none">
             <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md border">⌘ K</span>
